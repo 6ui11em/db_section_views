@@ -5,7 +5,7 @@
 	require_once('lib/class.db_section_view.php');
 	
 	/*
-	Copyight: Solutions Nitriques 2011
+	Copyright: Vaughan Hale
 	License: MIT
 	*/
 	class extension_db_section_views extends Extension {

@@ -16,9 +16,12 @@
 				'version'		=> '1.0',
 				'release-date'	=> '2011-11-22',
 				'author'		=> array(
-					'name'			=> 'Vaughan Hale | Markitable New Zealand',
-					'website'		=> 'http://www.markitable.co.nz',
-					'email'			=> 'support (at) markitable.co.nz'
+					array(
+						'name' => 'Vaughan Hale',
+					),
+					array(
+						'name' => 'James West',
+					)
 				),
 				'description'	=> '',
 				'compatibility' => array(

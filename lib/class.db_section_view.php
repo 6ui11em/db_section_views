@@ -22,6 +22,12 @@
 				$table_name = "tbl_entries_data_".$field_schema['id'];
 
 				switch ($field_schema['type']) {
+					case 'datetime':
+						$qry .= $table_name.".start AS ".$element_name."_start, ";
+						$qry .= $table_name.".end AS ".$element_name."_end, ";
+					break;
+					case 'date':
+					case 'datemodified':
 					case 'input':
 					case 'textarea':
 					case 'reflection':
@@ -40,7 +46,6 @@
 						
 						$element_name = $this->handle."__".str_replace("-", "_", $field_schema['element_name']);
 						$this->createRelationView($table_name, $element_name, $field_mapping);
-					break;
 					case 'taglist':
 						$field_mapping = array(
 							 "id" => "id"
@@ -66,6 +71,9 @@
 				$table_name = "tbl_entries_data_".$field_schema['id'];
 				
 				switch ($field_schema['type']) {
+					case 'datetime':
+					case 'date':
+					case 'datemodified':
 					case 'input':
 					case 'textarea':
 					case 'reflection':
@@ -76,7 +84,6 @@
 					case 'subsectionmanager':
 						//$qry .= " LEFT JOIN ".$table_name." ON ".$table_name.".entry_id=section.id";
 					break;
-					
 					default:
 						;
 					break;

@@ -1,6 +1,6 @@
 # Database Section Views #
 
-Version: 1.0
+Version: 1.0.1
 
 ## Creates MySQL Database Views that represent Symphony Sections. The idea behind this to to make custom datasource queries easier to construct. ##
 

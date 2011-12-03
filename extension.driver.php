@@ -13,8 +13,8 @@
 		public function about() {
 			return array(
 				'name'			=> 'Database Section Views',
-				'version'		=> '1.0',
-				'release-date'	=> '2011-11-22',
+				'version'		=> '1.0.1',
+				'release-date'	=> '2011-12-03',
 				'author'		=> array(
 					array(
 						'name' => 'Vaughan Hale',

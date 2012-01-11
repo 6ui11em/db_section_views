@@ -46,6 +46,7 @@
 						
 						$element_name = $this->handle."__".str_replace("-", "_", $field_schema['element_name']);
 						$this->createRelationView($table_name, $element_name, $field_mapping);
+					break;	
 					case 'taglist':
 						$field_mapping = array(
 							 "id" => "id"

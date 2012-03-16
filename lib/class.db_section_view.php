@@ -20,8 +20,9 @@
 			foreach ($section_fields_schema as $field_schema) {
 				$element_name = $this->handle."_".str_replace("-", "_", $field_schema['element_name']);
 				$table_name = "tbl_entries_data_".$field_schema['id'];
+				$field_type = $field_schema['type'];
 
-				switch ($field_schema['type']) {
+				switch ($field_type) {
 					case 'datetime':
 						$qry .= $table_name.".start AS ".$element_name."_start, ";
 						$qry .= $table_name.".end AS ".$element_name."_end, ";
@@ -29,10 +30,42 @@
 					case 'date':
 					case 'datemodified':
 					case 'input':
+					case 'uniquetext':
 					case 'textarea':
+					case 'number':
 					case 'reflection':
 					case 'order_entries':
+					case 'status':
 						$qry .= $table_name.".value AS ".$element_name.", ";
+					break;
+					case 'multilingual':
+						$supported_language_codes = General::Sanitize(Symphony::Configuration()->get('language_codes', 'language_redirect'));
+
+						// Support for older versions of Language Redirect
+						if (empty($supported_language_codes)) {
+							$supported_language_codes = General::Sanitize(Symphony::Configuration()->get('language_codes', 'languages'));
+						}
+						
+						$supported_language_codes = preg_split('/\s*,\s*/', $supported_language_codes);
+						
+						$qry .= $table_name.".value AS ".$element_name.", ";
+						foreach ($supported_language_codes as $lang) {				
+							$qry .= $table_name.".`value-".$lang."` AS ".$element_name."_".$lang.", ";
+						}
+					break;
+					case 'selectbox_link':
+						if ($this->isMultiple($field_schema['id'], 'selectbox_link') ) {
+							$field_mapping = array(
+								 "id" => "id"
+								,"entry_id" => $this->handle."_id"
+								,"relation_id" => str_replace("-", "_", $field_schema['element_name'])."_id"
+							);
+							
+							$element_name = $this->handle."__".str_replace("-", "_", $field_schema['element_name']);
+							$this->createRelationView($table_name, $element_name, $field_mapping);
+						} else {
+							$qry .= $table_name.".relation_id AS ".$element_name.", ";
+						}
 					break;
 					case 'uniqueupload':
 						$qry .= $table_name.".file AS ".$element_name.", ";
@@ -46,13 +79,24 @@
 						
 						$element_name = $this->handle."__".str_replace("-", "_", $field_schema['element_name']);
 						$this->createRelationView($table_name, $element_name, $field_mapping);
-					break;	
+						break;
 					case 'taglist':
 						$field_mapping = array(
 							 "id" => "id"
 							,"entry_id" => $this->handle."_id"
 							,"handle" => "handle"
 							,"value" => "name"
+						);
+						
+						$element_name = $this->handle."__".str_replace("-", "_", $field_schema['element_name']);
+						$this->createRelationView($table_name, $element_name, $field_mapping);
+					break;
+					
+					case 'xml_selectbox':
+						$field_mapping = array(
+							 "id" => "id"
+							,"entry_id" => $this->handle."_id"
+							,"value" => "value"
 						);
 						
 						$element_name = $this->handle."__".str_replace("-", "_", $field_schema['element_name']);
@@ -76,11 +120,19 @@
 					case 'date':
 					case 'datemodified':
 					case 'input':
+					case 'uniquetext':
+					case 'number':
 					case 'textarea':
 					case 'reflection':
 					case 'order_entries':
 					case 'uniqueupload':
+					case 'multilingual':
+					case 'status':
 						$qry .= " LEFT JOIN ".$table_name." ON ".$table_name.".entry_id=section.id";
+					break;
+					case 'selectbox_link':
+						if (!$this->isMultiple($field_schema['id'], 'selectbox_link'))
+							$qry .= " LEFT JOIN ".$table_name." ON ".$table_name.".entry_id=section.id";
 					break;
 					case 'subsectionmanager':
 						//$qry .= " LEFT JOIN ".$table_name." ON ".$table_name.".entry_id=section.id";
@@ -100,6 +152,12 @@
 	     	$section = Symphony::Database()->fetch("SELECT `id`, `handle` FROM `tbl_sections` WHERE `id` = '".$section_id."'LIMIT 1");
 	     	$this->_section->set('id', $section[0]['id']);
 	     	$this->handle = str_replace("-", "_", $section[0]['handle']);
+		}
+		
+		function isMultiple($id, $field_type) {
+	     	$allow_multiple = Symphony::Database()->fetchVar("allow_multiple_selection", 0, "SELECT `allow_multiple_selection` FROM `tbl_fields_".$field_type."` WHERE `field_id` = '".$id."' LIMIT 1");
+
+				return $allow_multiple == 'yes';
 		}
 		
 		function createRelationView($table_name, $view_name, $field_mapping){
